@@ -1,28 +1,48 @@
 extends layout
 
 block content
-  div
-    h1 #{article.title}
-    labelset
-      label
-      p #{article.description}
-    a(href='/delete_article/#{article.id}') DELETE
-  hr
-  br
-  div
-    form(action='/register_comment/#{article.id}' method='post')
-      legend USERNAME :
-      input(type='text' name='username')
-      p
-      legend COMMENTS :
-      textarea(name='description', rows='4', cols='80')
-      br
-      input(type='submit')
+  if(article)
+    div
+      h1 #{article.title}
+      labelset
+        label
+        p #{article.description}
+      a(href='/delete_article/#{article.id}') DELETE
+    hr
+    br
 
-   div
-    ul
-      each comment in comments
-        li #{comment.username} : #{comment.description}
-          if(comment.deleted==null)
-            a(href='/delete_comment/#{article.id}/#{comment.id}') DELETE
-          
+    div
+      form(action='/register_comment/#{article.id}' method='post')
+        legend USERNAME :
+        input(type='text' name='username')
+        p
+        legend COMMENTS :
+        textarea(name='description', rows='4', cols='80')
+        br
+        input(type='submit')
+
+     div
+      if(comments)
+        ul
+          each comment in comments
+            li #{comment.username} : #{comment.description}
+              if(comment.deleted==null)
+                a(href='/delete_comment/#{article.id}/#{comment.id}') DELETE
+              if(child_comments)
+                ul
+                  each child_comment in child_comments
+                    if(child_comment.comments_id == comment.id)
+                      li #{child_comment.username} : #{child_comment.description}
+                        if(child_comment.deleted==null)
+                          a(href='/delete_comment/#{article.id}/#{child_comment.id}') DELETE
+              form(action='/register_comment/#{article.id}/#{comment.id}' method='post')
+               legend USERNAME :
+               input(type='text' name='username')
+               p
+               legend COMMENTS :
+               textarea(name='description', rows='2', cols='40')
+               br
+               input(type='submit')
+
+  else
+    legend NO DATA

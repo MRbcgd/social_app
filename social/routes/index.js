@@ -38,15 +38,25 @@ router.get('/read_article/:id', function(req, res, next) {
       return console.log(error)
     }
     //선택한 article의 comments
-    client.query('SELECT id,username,description,deleted, FROM comments WHERE articles_id=? AND comments_id IS NULL',[
+    client.query('SELECT id,username,description,deleted FROM comments WHERE articles_id=? AND comments_id IS NULL',[
       id
     ],function(error,comments_results){
           if(error){
             return console.log(error)
           }
-          res.render('read_article',{
-            article : article_result[0],
-            comments : comments_results,
+
+          client.query('SELECT * FROM comments WHERE articles_id =? AND comments_id IS NOT NULL',[
+            id
+          ],function(error,child_comments_results){
+            if(error){
+              return console.log(error)
+            }
+
+            res.render('read_article',{
+              article : article_result[0],
+              comments : comments_results,
+              child_comments : child_comments_results
+            })
           })
         })
   })
@@ -64,18 +74,38 @@ router.get('/delete_article/:id',function(req, res, next){
     res.redirect('/')
   })
 })
-router.post('/register_comment/:id',function(req, res, next){
-  var id=req.params.id//article id
+router.post([
+  '/register_comment/:article_id',
+  '/register_comment/:article_id/:comment_id'
+],function(req, res, next){
+  
+  var article_id=req.params.article_id//article id
+  var comment_id=req.params.comment_id
   var body=req.body//username,comment description
-  client.query('INSERT INTO comments (username,description,articles_id) VALUES (?,?,?)',[
-    body.username,body.description,id
-  ],function(error){
-    if(error){
-      return console.log(error)
-    }
 
-    res.redirect('/read_article/'+id)
-  })
+  var query1='INSERT INTO comments (username,description,articles_id) VALUES (?,?,?)'
+  var query2='INSERT INTO comments (username,description,articles_id,comments_id) VALUES (?,?,?,?)'
+
+  if(!comment_id){//register comment
+    client.query(query1,[
+      body.username,body.description,article_id
+    ],function(error){
+      if(error){
+        return console.log(error)
+      }
+    })
+  }
+  if(comment_id){//register child comment
+    client.query(query2,[
+      body.username,body.description,article_id,comment_id
+    ],function(error){
+      if(error){
+        return console.log(error)
+      }
+    })
+  }
+
+  res.redirect('/read_article/'+article_id)
 })
 router.get('/delete_comment/:article_id/:id',function(req,res,next){
   var article_id=req.params.article_id
@@ -90,5 +120,8 @@ router.get('/delete_comment/:article_id/:id',function(req,res,next){
 
     res.redirect('/read_article/'+article_id)
   })
+})
+router.all('*',function(req,res,next){
+  res.redirect('/')
 })
 module.exports = router;
