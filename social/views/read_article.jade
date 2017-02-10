@@ -1,0 +1,28 @@
+extends layout
+
+block content
+  div
+    h1 #{article.title}
+    labelset
+      label
+      p #{article.description}
+    a(href='/delete_article/#{article.id}') DELETE
+  hr
+  br
+  div
+    form(action='/register_comment/#{article.id}' method='post')
+      legend USERNAME :
+      input(type='text' name='username')
+      p
+      legend COMMENTS :
+      textarea(name='description', rows='4', cols='80')
+      br
+      input(type='submit')
+
+   div
+    ul
+      each comment in comments
+        li #{comment.username} : #{comment.description}
+          if(comment.deleted==null)
+            a(href='/delete_comment/#{article.id}/#{comment.id}') DELETE
+          

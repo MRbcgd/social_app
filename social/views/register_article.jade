@@ -1,0 +1,15 @@
+extends layout
+
+block content
+   div
+    form(action='/register_article' method='post')
+      h1 REGISTER ARTICLE
+      label title :
+      p
+        input(type='text' name='title')
+      br
+      label description :
+      p
+        textarea(name='description', rows='8', cols='80')
+      p
+        input(type='submit')

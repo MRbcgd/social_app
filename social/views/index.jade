@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  div
+    ul
+      each article in articles
+        li
+          a(href='/read_article/#{article.id}') #{article.title}
+          &nbsp;
